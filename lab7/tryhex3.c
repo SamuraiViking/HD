@@ -2,8 +2,16 @@
  * C program to convert Hexadecimal to Decimal number system
  */
 #include <stdio.h>
-#include <math.h>
 #include <string.h>
+
+int myPow(num, exp) {
+  int result = 1;
+  for (int i = 0; i < exp; ++i)
+  {
+    result *= num;
+  }
+  return result;
+}
 
 int main()
 {
@@ -42,7 +50,7 @@ int main()
       val = hex[i] - 65 + 10;
     }
 
-    decimal += val * pow(16, len);
+    decimal += val * myPow(16, len);
     len--;
   }
   printf("The value of %s hexadecimal is %lld\n", hex, decimal);
