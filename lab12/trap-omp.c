@@ -34,6 +34,8 @@ int main(int argc, char** argv) {
   integral = (f(a) + f(b))/2.0;
   int i;
 
+#pragma omp parrallel for num_threads(threadct) \
+  shared(a, n ,h, integral) private(i)
   for(i = 1; i < n; i++) {
     integral += f(a+i*h);
   }
