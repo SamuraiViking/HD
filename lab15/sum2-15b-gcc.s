@@ -9,7 +9,7 @@
 	.eabi_attribute 30, 6
 	.eabi_attribute 34, 1
 	.eabi_attribute 18, 4
-	.file	"sum2.c"
+	.file	"sum2-15b.c"
 	.text
 	.section	.rodata
 	.align	2
@@ -20,7 +20,7 @@
 	.ascii	"%d %d\000"
 	.align	2
 .LC2:
-	.ascii	"The sum of %d and %d is plus 1 %d\012\000"
+	.ascii	"The sum of twice %d and %d is %d\012\000"
 	.text
 	.align	2
 	.global	main
@@ -44,8 +44,9 @@ main:
 	bl	__isoc99_scanf
 	ldr	r2, [fp, #-12]
 	ldr	r3, [fp, #-16]
+	add	r2, r2, r3
+	ldr	r3, [fp, #-12]
 	add	r3, r2, r3
-	add r3, r3, #1
 	str	r3, [fp, #-8]
 	ldr	r1, [fp, #-12]
 	ldr	r2, [fp, #-16]
