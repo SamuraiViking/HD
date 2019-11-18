@@ -6,7 +6,10 @@ greeting:
 	.asciz "Hello, World!\n"
 
 goodbye:
-	.asciz "Good, Bye!\n"
+	.asciz "Good, Bye\n"
+
+decAndHexMsg:
+	.asciz "The number %d in hex is %x\n"
 
 /* Main Program */
 	.text 
@@ -24,6 +27,11 @@ main:
 	ldr r0, goodbyeP
 	bl printf
 
+	ldr r0, decAndHexMsgP
+	ldr r1, sevenHundredTwentyNineP
+	ldr r2, sevenHundredTwentyNineP
+	bl printf
+
 	mov r0, #0
 	sub sp, fp, #4
 	pop {fp, pc}
@@ -36,3 +44,9 @@ greetingP:
 
 goodbyeP:
 	.word goodbye
+
+decAndHexMsgP:
+	.word decAndHexMsg
+
+sevenHundredTwentyNineP:
+	.word 729
