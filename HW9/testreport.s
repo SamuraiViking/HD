@@ -2,13 +2,7 @@ prodplus:
 	push {fp, lr}
 	add	fp, sp, #0
 	sub	sp, sp, #20
-	str	r0, [fp, #-8]
-	str	r1, [fp, #-12]
-	str	r2, [fp, #-16]
-	ldr	r3, [fp, #-8]
-	ldr	r2, [fp, #-12]
-	mul	r2, r2, r3
-	ldr	r3, [fp, #-16]
+	mul	r2, r2, r1
 	add	r3, r2, r3
 	mov	r0, r3
 	sub	sp, fp, #0
@@ -42,9 +36,9 @@ main:
 	ldr	r0, inputP
 	bl	__isoc99_scanf
 
-	ldr	r3, [fp, #-8]
-	ldr	r1, [fp, #-12]
-	ldr	r2, [fp, #-16]
+	ldr	r3, [fp, #-16]
+	ldr	r2, [fp, #-12]
+	ldr r1, [fp, #-8]
 	mov	r0, r3
 	bl	prodplus
 
