@@ -217,6 +217,10 @@ main:
 	mov	r1, #100
 	bl	get_line
 
+    mov r1, r0
+    ldr r0, testP
+    bl printf
+
 	ldr r0, buffP
     mov r1, #1
     mov r2, #'X'
@@ -247,7 +251,7 @@ hello:
 	.align 	2
 
 test:
-    .asciz "%d\n"
+    .asciz "There were %d input characters\n"
     .align 2
 
 hello_fmt:	
