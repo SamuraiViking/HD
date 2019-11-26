@@ -1,5 +1,5 @@
 
-square: 
+square:
     push {fp, lr}
 	add	fp, sp, #0
 	sub	sp, sp, #12
