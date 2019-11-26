@@ -29,7 +29,7 @@ get_trans:
 
 	mov r4, r0
 	cmp r4, #' '
-	bne space_at_one
+	bne no_space_at_one
 
 	ldr r0, inputCharsP		@ r0 = inputChars
 	mov r1, #3				@ r1 = 4
@@ -37,18 +37,22 @@ get_trans:
 
 	mov r5, r0				@ r5 = r0
 	cmp r5, #'\n'
-	bne newline_at_three
+	@ bne	fail
+	bne no_newline_at_three
 
-	b end_function	
-
+	b end_function
 	.align 2
 
-space_at_one:
+	mov r0, #0
+	sub sp, fp, #4
+	pop {fp, pc}
+
+no_space_at_one:
 	ldr r0, no_space_at_one_textP
 	bl printf
 	b end_function
 
-newline_at_three:
+no_newline_at_three:
 	ldr r0, no_newline_at_index_fourP
 	bl printf
 	b end_function
@@ -125,6 +129,7 @@ no_space_at_one_textP: .word no_space_at_one_text
 	@ strings
 	.section	.rodata
 	.align 	2
+
 hello:	
 	.asciz	"Hello, world!\n"
 	.align 	2
@@ -138,7 +143,7 @@ charFormat:
     .align 2
 
 print_summary_text:
-	.asciz "This problem should print only the header line of print_summary out.\nWhat is a header line???\nWhat is print summary output???\nAn example input and output would be extremely helpful\n"
+	.asciz "Primary Text\n"
 	.align 2
 
 get_line_prompt:
@@ -148,7 +153,7 @@ no_space_at_one_text:
 	.asciz "There was no space at index one\n"
 
 no_newline_at_index_four:
-	.asciz "There was no newline at index four\n"
+	.asciz "There was no newline at index three\n"
 
 	.data
 	.align	2
