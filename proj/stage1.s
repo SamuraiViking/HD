@@ -24,21 +24,39 @@ get_trans:
 	sub sp, sp, #20
 
 	ldr r0, inputCharsP 	@ r0 = inputChars
-	mov r1, #2				@ r1 = 2
+	mov r1, #1				@ r1 = 2
 	bl get_byte				@ r0 = r0[r1]
 
 	mov r4, r0
+	cmp r4, #' '
+	bne space_at_one
 
 	ldr r0, inputCharsP		@ r0 = inputChars
-	mov r1, #4				@ r1 = 4
+	mov r1, #3				@ r1 = 4
 	bl get_byte				@ r0 = r0[r1]
 
 	mov r5, r0				@ r5 = r0
+	cmp r5, #'\n'
+	bne newline_at_three
 
-	sub sp, fp, #0			@ collapse
-	pop {r4, r5, fp, pc}	
+	b end_function	
 
 	.align 2
+
+space_at_one:
+	ldr r0, no_space_at_one_textP
+	bl printf
+	b end_function
+
+newline_at_three:
+	ldr r0, no_newline_at_index_fourP
+	bl printf
+	b end_function
+
+end_function:
+	mov r0, #0
+	sub sp, fp, #0			@ collapse
+	pop {r4, r5, fp, pc}
 
 /* main program */
 	.text
@@ -57,8 +75,6 @@ print_summary:
 
 	sub sp, fp, #0
 	pop {fp, pc}
-
-
 
 main:
 	push {r4, r5, fp, lr}	@ setup stack frame
@@ -103,6 +119,8 @@ testOuputP: 	  	 .word testOuput
 charFormatP:      	 .word charFormat
 print_summary_textP: .word print_summary_text
 get_line_promptP:    .word get_line_prompt
+no_newline_at_index_fourP: .word no_newline_at_index_four
+no_space_at_one_textP: .word no_space_at_one_text
 
 	@ strings
 	.section	.rodata
@@ -124,7 +142,13 @@ print_summary_text:
 	.align 2
 
 get_line_prompt:
-	.asciz	"\nEnter a line of input (up to 99 chars):"
+	.asciz	"Enter a line of input (up to 99 chars):"
+
+no_space_at_one_text:
+	.asciz "There was no space at index one\n"
+
+no_newline_at_index_four:
+	.asciz "There was no newline at index four\n"
 
 	.data
 	.align	2
