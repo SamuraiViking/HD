@@ -1,41 +1,43 @@
 
 	.align	2
 	.global	sum
+
 sum:
 	str	fp, [sp, #-4]!
 	add	fp, sp, #0
 	sub	sp, sp, #20
+
 	str	r0, [fp, #-8]
 	str	r1, [fp, #-12]
 	str	r2, [fp, #-16]
 	str	r3, [fp, #-20]
+
 	ldr	r2, [fp, #-8]
 	ldr	r3, [fp, #-12]
 	add	r2, r2, r3
+
 	ldr	r3, [fp, #-16]
 	add	r2, r2, r3
+
 	ldr	r3, [fp, #-20]
 	add	r2, r2, r3
+
 	ldr	r3, [fp, #4]
 	add	r3, r2, r3
+
 	mov	r0, r3
 	add	sp, fp, #0
 	ldr	fp, [sp], #4
 	bx	lr
-	.size	sum, .-sum
-	.section	.rodata
 	.align	2
-.LC0:
-	.ascii	"sum(%d, %d, %d, %d, %d) == %d\012\000"
-	.text
+
+sum_of_inputs_text:
+	.asciz	"sum(%d, %d, %d, %d, %d) == %d\n"
 	.align	2
 	.global	main
-	.syntax unified
-	.arm
-	.fpu vfp
-	.type	main, %function
+
 main:
-	push	{fp, lr}
+	push {fp, lr}
 	add	fp, sp, #4
 	sub	sp, sp, #40
 
@@ -69,15 +71,14 @@ main:
 	ldr	r3, [fp, #-16]
 	ldr	r2, [fp, #-12]
 	ldr	r1, [fp, #-8]
-	ldr	r0, .L5
+	ldr	r0, sum_of_inputs_textP
 	bl	printf
+
 	mov	r3, #0
 	mov	r0, r3
 	sub	sp, fp, #4
 	pop	{fp, pc}
 
-
-.L5:
-	.word	.LC0
+sum_of_inputs_textP: .word sum_of_inputs_text
 
 

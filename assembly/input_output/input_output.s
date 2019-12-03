@@ -14,7 +14,7 @@ numbers_entered_prompt:
 	.global	main
 
 main:
-	push	{fp, lr}
+	push {fp, lr}
 	add	fp, sp, #4
 	sub	sp, sp, #16
 

@@ -124,7 +124,6 @@ get_byteT:
 	ldr	r0, get_byte_fmt3P	@ print b as a character
 	ldr	r1, [fp, #-16]
 	bl	printf
-
 get_byte_nl:	
 	ldr	r0, get_byte_fmt4P	@ print newline
 	bl	printf

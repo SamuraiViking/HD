@@ -209,7 +209,6 @@ put_byte_fmt1:
 main:
 	push	{fp, lr}	@ setup stack frame
 	add 	fp, sp, #4
-	@sub	sp, sp, #8	@ 0 arg
 
 	ldr	r0, get_line_promptP
 	bl	puts
