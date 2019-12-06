@@ -84,6 +84,8 @@ main:
 	mov r1, pc
 	bl	printf
 
+	b	.L11
+
 	mov	r3, #0
 	str	r3, [fp, #-8]
 	ldr	r0, .L7
@@ -122,6 +124,9 @@ main:
 	pop	{fp, pc}
 .L8:
 	.align	2
+
+.L11:	b	.L11
+
 .L7:
 	.word	.LC0
 	.word	.LC1
@@ -132,3 +137,4 @@ main:
 	.size	main, .-main
 	.ident	"GCC: (Raspbian 8.3.0-6+rpi1) 8.3.0"
 	.section	.note.GNU-stack,"",%progbits
+
