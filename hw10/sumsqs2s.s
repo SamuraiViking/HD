@@ -47,6 +47,11 @@ square:
 	.ascii	"The sum of the first %d squares is %d.\012\000"
 	.text
 	.align	2
+
+.LC3:
+	.ascii	"The value of fp is 0x%x\012\000"
+	.align	2
+
 	.global	main
 	.syntax unified
 	.arm
@@ -58,6 +63,11 @@ main:
 	push	{fp, lr}
 	add	fp, sp, #4
 	sub	sp, sp, #16
+
+	ldr r0, .L7+12
+	mov r1, fp
+	bl  printf
+
 	mov	r3, #0
 	str	r3, [fp, #-8]
 	ldr	r0, .L7
@@ -100,6 +110,7 @@ main:
 	.word	.LC0
 	.word	.LC1
 	.word	.LC2
+	.word	.LC3
 	.size	main, .-main
 	.ident	"GCC: (Raspbian 8.3.0-6+rpi1) 8.3.0"
 	.section	.note.GNU-stack,"",%progbits
