@@ -1,7 +1,11 @@
     
     .align      2
     .global     main
-
+/*
+///////////////
+// get_trans //
+///////////////
+ */
 get_trans:
     push    {fp, lr}
     add     fp, sp, #0
@@ -40,6 +44,11 @@ validFormat:
     sub     sp, fp, #0
     pop     {fp, pc}
 
+/*
+///////////////
+// translate //
+///////////////
+ */
 translate:
     @       [fp, #-8] = trans_chars[0]
     @       [fp, #-12] = trans_chars[2]
@@ -70,6 +79,11 @@ translate_char:
     ldr     r1, [fp, #-16]
     ldr     r2, [fp, #-12]
     bl      put_byte
+    bl      next_char
+
+count_space:
+    add     r5, r5, #1
+    bl      next_char
 
 next_char:
     ldr     r0, [fp, #-16]
@@ -77,6 +91,7 @@ next_char:
     str     r0, [fp, #-16]
 
     add     r6, r6, #1
+    bl      loop_through_chars
 
 loop_through_chars:
     ldr     r0, input_charsP
@@ -88,14 +103,23 @@ loop_through_chars:
     cmp     r0, r1
     beq     translate_char
 
+    cmp     r0, #' '
+    beq     count_space
+
     cmp     r0, #0
     bne     next_char
 
-    add     r5, r5, #1
+
+    add     r4, r4, #1
 
     sub     sp, fp, #0
     pop     {fp, pc}
 
+/*
+///////////////////
+// print_summary //
+//////////////////
+*/
 print_summary:
     push    {fp, lr}
     add     fp, sp, #0
@@ -108,13 +132,22 @@ print_summary:
     mov     r1, r6
     bl      printf
 
-    ldr     r0, num_of_new_linesP
+    ldr     r0, num_of_wordsP
     mov     r1, r5
+    bl      printf
+
+    ldr     r0, num_of_new_linesP
+    mov     r1, r4
     bl      printf
 
     sub     sp, fp, #0
     pop     {fp, pc}
 
+/*
+//////////
+// main //
+//////////
+*/
 main:
     push    {fp, lr}
     add     fp, sp, #0
@@ -134,7 +167,6 @@ main:
     bl      get_lines
 
 run_get_lines_again:
-    add     r4, r4, #1  @ nLines += 1
 
 get_lines:
     ldr     r0, input_charsP
