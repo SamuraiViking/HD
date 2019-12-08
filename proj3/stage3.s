@@ -44,6 +44,43 @@ validFormat:
     sub     sp, fp, #0
     pop     {fp, pc}
 
+is_letter:
+    push    {fp, lr}
+    add     fp, sp, #0
+    sub     sp, sp, #10
+
+    str     r0, [fp, #-8]
+    ldr     r1, [fp, #-8]
+
+    cmp     r1, #'A'
+    ble     not_letter
+
+    cmp     r1, #'z'
+    bgt     not_letter
+
+    cmp     r1, #'Z'
+    bgt     maybe_letter
+
+    bl      char_is_letter
+
+maybe_letter:
+    cmp     r1, #'a'
+    blt     not_letter
+
+    bl      char_is_letter
+
+not_letter:
+    mov     r0, #0
+    sub     sp, fp, #0
+    pop     {fp, pc}
+
+char_is_letter:
+    mov     r0, #1
+    sub     sp, fp, #0
+    pop     {fp, pc}
+
+
+
 /*
 ///////////////
 // translate //
@@ -53,6 +90,7 @@ translate:
     @       [fp, #-8] = trans_chars[0]
     @       [fp, #-12] = trans_chars[2]
     @       [fp, #-16] = index
+    @       [fp, #-20] = between_words (1 = true, 0 = false)
     push    {fp, lr}
     add     fp, sp, #0
     sub     sp, sp, #40
@@ -72,6 +110,9 @@ translate:
     mov     r1, #0
     str     r1, [fp, #-16]
 
+    mov     r1, #1
+    str     r1, [fp, #-20]
+
     bl      loop_through_chars
 
 translate_char:
@@ -81,8 +122,22 @@ translate_char:
     bl      put_byte
     bl      next_char
 
-count_space:
+not_between_words:
+    ldr     r1, [fp, #-20]
+    cmp     r1, #1
+    beq     count_word
+    bl      next_char
+
+count_word:
     add     r5, r5, #1
+    mov     r1, #0
+    str     r1, [fp, #-20]
+    bl      next_char
+
+between_words:
+    mov     r1, #1
+    str     r1, [fp, #-20]
+
     bl      next_char
 
 next_char:
@@ -98,13 +153,24 @@ loop_through_chars:
     ldr     r1, [fp, #-16]
     bl      get_byte
 
+    str     r0, [fp, #-24]
     ldr     r1, [fp, #-8]
 
+    ldr     r0, [fp, #-24]
     cmp     r0, r1
     beq     translate_char
 
+    ldr     r0, [fp, #-24]
     cmp     r0, #' '
-    beq     count_space
+    beq     between_words
+
+    ldr     r0, [fp, #-24]
+    bl      is_letter
+
+    cmp     r0, #1
+    beq     not_between_words
+
+    ldr     r0, [fp, #-24]
 
     cmp     r0, #0
     bne     next_char
