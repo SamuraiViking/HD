@@ -19,23 +19,23 @@ get_trans:
     bl      get_byte                @ r0 = input_charsP[1]
 
     cmp     r0, #' '
-    bne     false
+    bne     invalidFormat
 
     mov     r1, #3
     ldr     r0, trans_charsP
     bl      get_byte                @ r0 = input_charsP[3]
 
     cmp     r0, #'\n'
-    bne     false
+    bne     invalidFormat
 
-    bl      true
+    bl      validFormat
 
-false:
+invalidFormat:
     mov     r0, #0
     sub     sp, fp, #0
     pop     {fp, pc}
 
-true:
+validFormat:
     mov     r0, #1
     sub     sp, fp, #0
     pop     {fp, pc}
@@ -63,20 +63,22 @@ translate:
     mov     r1, #0
     str     r1, [fp, #-16]
 
-    bl      translate_loop
+    bl      loop_through_chars
 
-char_to_trans_found:
+translate_char:
     ldr     r0, input_charsP
     ldr     r1, [fp, #-16]
     ldr     r2, [fp, #-12]
     bl      put_byte
 
-translate_increase_index:
+next_char:
     ldr     r0, [fp, #-16]
     add     r0, r0, #1
     str     r0, [fp, #-16]
 
-translate_loop:
+    add     r6, r6, #1
+
+loop_through_chars:
     ldr     r0, input_charsP
     ldr     r1, [fp, #-16]
     bl      get_byte
@@ -84,132 +86,31 @@ translate_loop:
     ldr     r1, [fp, #-8]
 
     cmp     r0, r1
-    beq     char_to_trans_found
+    beq     translate_char
 
     cmp     r0, #0
-    bne     translate_increase_index
+    bne     next_char
+
+    add     r5, r5, #1
 
     sub     sp, fp, #0
     pop     {fp, pc}
 
 print_summary:
-    @ [fp, #-8] = index
     push    {fp, lr}
     add     fp, sp, #0
     sub     sp, sp, #16
-
-    ldr     r0, input_charsP
-    mov     r1, #'\n'
-    bl      num_of_char_in_chars
-
-    str     r0, [fp, #-8]
-
-    ldr     r0, input_charsP
-    mov     r1, #' '
-    bl      num_of_char_in_chars
-
-    str     r0, [fp, #-12]
-    ldr     r0, [fp, #-12]
-    add     r0, r0, #1
-    str     r0, [fp, #-12]
-
-    ldr     r0, input_charsP
-    bl      num_of_chars
-
-    str     r0, [fp, #-16]
 
     ldr     r0, summary_headerP
     bl      printf
 
     ldr     r0, num_of_charactersP
-    ldr     r1, [fp, #-16]
+    mov     r1, r6
     bl      printf
 
     ldr     r0, num_of_new_linesP
-    ldr     r1, [fp, #-8]
+    mov     r1, r5
     bl      printf
-
-    ldr     r0, num_of_wordsP
-    ldr     r1, [fp, #-12]
-    bl      printf
-
-
-    sub     sp, fp, #0
-    pop     {fp, pc}
-
-num_of_chars:
-    @       [fp, #-8] = input_chars
-    @       [fp, #-12] = index
-    push    {fp, lr}
-    add     fp, sp, #0
-    sub     sp, sp, #20
-
-    str     r0, [fp, #-8]
-
-    mov     r1, #0
-    str     r1, [fp, #-12]
-
-    bl      char_at_index
-
-add_one_to_index:
-    ldr     r1, [fp, #-12]
-    add     r1, r1, #1
-    str     r1, [fp, #-12]
-
-char_at_index:
-    ldr     r0, [fp, #-8]
-    ldr     r1, [fp, #-12]
-    bl      get_byte
-
-    cmp     r0, #0
-    bne     add_one_to_index
-
-    ldr     r0, [fp, #-12]
-
-    sub     sp, fp, #0
-    pop     {fp, pc}
-
-
-num_of_char_in_chars:
-    @       [fp, #-8]   = input_chars
-    @       [fp, #-12]  = char
-    push    {fp, lr}
-    add     fp, sp, #0
-    sub     sp, sp, #20
-
-    str     r0, [fp, #-8]   @ input_chars
-    str     r1, [fp, #-12]  @ char
-
-    mov     r1, #0
-    str     r1, [fp, #-16]  @ index
-    str     r1, [fp, #-20]  @ number of occurences
-
-    bl      current_char
-
-char_found:
-    ldr     r1, [fp, #-20]
-    add     r1, r1, #1
-    str     r1, [fp, #-20]
-
-next_char:
-    ldr     r1, [fp, #-16]
-    add     r1, r1, #1
-    str     r1, [fp, #-16]
-
-current_char:
-    ldr     r0, [fp, #-8]   @ input_chars
-    ldr     r1, [fp, #-16]  @ index
-    bl      get_byte
-
-    ldr     r1, [fp, #-12]  @ char to find
-
-    cmp     r0, r1
-    beq     char_found
-
-    cmp     r0, #0
-    bne     next_char
-
-    ldr     r0, [fp, #-20]
 
     sub     sp, fp, #0
     pop     {fp, pc}
@@ -219,7 +120,7 @@ main:
     add     fp, sp, #0
     sub     sp, sp, #16
     
-    bl      get_trans                   @ r0 == (input_chars[3] == '\n' && input_chars[1] == ' ') ? 1 : 0
+    bl      get_trans  @ r0 == (input_chars[3] == '\n' && input_chars[1] == ' ') ? 1 : 0
 
     cmp     r0, #0
     beq     end_main
@@ -227,43 +128,35 @@ main:
     ldr     r0, enter_input_charsP
     bl      printf
 
-    mov     r4, #0
-    mov     r5, #0
-    mov     r6, #0
+    mov     r4, #0      @ r4 = nLines
+    mov     r5, #0      @ r5 = nWords
+    mov     r6, #0      @ r6 = nChars
     bl      get_lines
 
-get_another_line:
-    add     r4, r4, #1
-    mov     r1, r4
-    ldr     r0, one_decP
-    bl      printf
+run_get_lines_again:
+    add     r4, r4, #1  @ nLines += 1
 
 get_lines:
     ldr     r0, input_charsP
     mov     r1, #100
-    bl      get_line
+    bl      get_line    @ get line from user
 
     ldr     r0, input_charsP
     mov     r1, #0
-    bl      get_byte
+    bl      get_byte    @ r0 = input_chars[0]
 
     cmp     r0, #'\n'
-    beq     end_main
+    beq     end_get_lines    @ if r0[0] != '\n'
 
     bl      translate
 
     ldr     r0, input_charsP
-    bl      printf   
+    bl      printf
 
-    bl      get_another_line
+    bl      run_get_lines_again
 
-
-    bl      translate                   @ input_chars[0] = *
-
-    ldr     r0, input_charsP
-    bl      printf                      @ print translated input_chars
-
-    bl      print_summary               @ 
+end_get_lines:
+    bl      print_summary
     bl      end_main
 
 end_main:

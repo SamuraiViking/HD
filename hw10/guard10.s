@@ -22,6 +22,10 @@ guard:
     cmp     r1, #1
     bge     else
 
+    ldr     r0, true_textP
+    bl      printf
+
+    mov     r0, #0
     bl      end_guard
 
 else:
@@ -64,6 +68,7 @@ main:
 two_intP:               .word   two_int
 enter_two_nums_textP:   .word   enter_two_nums_text
 false_textP:            .word   false_text
+true_textP:             .word   true_text
 
 enter_two_nums_text:
     .asciz      "Enter two nums: "
@@ -75,4 +80,8 @@ two_int:
 
 false_text:
     .asciz      "%d and %d do not follow the condition: x+y > 7 && x <= 0\n"
+    .align 2
+
+true_text:
+    .asciz      "valid numbers\n"
     .align 2
