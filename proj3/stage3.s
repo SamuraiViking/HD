@@ -115,14 +115,6 @@ translate:
 
     bl      loop_through_chars
 
-
-compare_to_inchar:
-    ldr     r0, [fp, #-24]
-    ldr     r1, [fp, #-8]
-    cmp     r0, r1
-    beq     translate_char
-    bl      next_char
-
 translate_char:
     ldr     r0, input_charsP
     ldr     r1, [fp, #-16]
@@ -134,19 +126,19 @@ not_between_words:
     ldr     r1, [fp, #-20]
     cmp     r1, #1
     beq     count_word
-    bl      compare_to_inchar
+    bl      translate_char_guard
 
 count_word:
     add     r5, r5, #1
     mov     r1, #0
     str     r1, [fp, #-20]
-    bl      compare_to_inchar
+    bl      translate_char_guard
 
 between_words:
     mov     r1, #1
     str     r1, [fp, #-20]
 
-    bl      compare_to_inchar
+    bl      translate_char_guard
 
 next_char:
     ldr     r0, [fp, #-16]
@@ -173,6 +165,7 @@ loop_through_chars:
     cmp     r0, #1
     beq     not_between_words
 
+translate_char_guard:
     ldr     r0, [fp, #-24]
     ldr     r1, [fp, #-8]
     cmp     r0, r1
@@ -182,7 +175,6 @@ loop_through_chars:
 
     cmp     r0, #0
     bne     next_char
-
 
     add     r4, r4, #1
 
