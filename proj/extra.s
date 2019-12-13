@@ -73,6 +73,15 @@ is_letter:
     str     r0, [fp, #-8]
     ldr     r1, [fp, #-8]
 
+    cmp     r1, #'\n'
+    beq     is_whitespace
+
+    cmp     r1, #' '
+    beq     is_whitespace
+
+    cmp     r1, #'\t'
+    beq     is_whitespace
+
     cmp     r1, #'A'            @ not letter if r1 < A
     ble     not_letter
 
@@ -83,6 +92,10 @@ is_letter:
     bgt     maybe_letter
 
     bl      char_is_letter 
+
+is_whitespace:
+    add     r9, r9, #1
+    bl      not_letter
 
 maybe_letter:
     cmp     r1, #'a'            @ not letter if r1 < a
@@ -96,6 +109,7 @@ not_letter:
     pop     {fp, pc}
 
 char_is_letter:
+    add     r8, r8, #1
     mov     r0, #1              @ return 1
     sub     sp, fp, #0
     pop     {fp, pc}
@@ -141,6 +155,7 @@ translate_char:
     ldr     r1, [fp, #-16]      @ load index
     ldr     r2, [fp, #-12]      @ load out char
     bl      put_byte            @ replace input char with output char
+    add     r7, r7, #1          @ add 1 to number of replacements
     bl      next_char           
 
 not_between_words:
@@ -227,6 +242,18 @@ print_summary:
     mov     r1, r4
     bl      printf
 
+    ldr     r0, num_of_replacementsP    @ print num of replacements
+    mov     r1, r7
+    bl      printf
+
+    ldr     r0, num_of_charactersP
+    mov     r1, r8
+    bl      printf
+
+    ldr     r0, num_of_whitespacesP
+    mov     r1, r9
+    bl      printf
+
     sub     sp, fp, #0              @ colapse stack frame
     pop     {fp, pc}
 
@@ -252,6 +279,9 @@ main:
     mov     r4, #0      @ r4 = nLines
     mov     r5, #0      @ r5 = nWords
     mov     r6, #0      @ r6 = nChars
+    mov     r7, #0      @ r7 = number of replacements
+    mov     r8, #0      @ r8 = num of letters
+    mov     r9, #0      @ r9 = num of whitespaces
     bl      get_lines
 
 run_get_lines_again:
@@ -295,7 +325,10 @@ summary_headerP    :     .word   summary_header
 num_of_new_linesP  :     .word   num_of_new_lines
 num_of_wordsP      :     .word   num_of_words
 num_of_charactersP :     .word   num_of_characters
-two_charsP         :     .word   two_chars           
+two_charsP         :     .word   two_chars        
+num_of_replacementsP:    .word   num_of_replacements   
+num_of_lettersP:         .word   num_of_letters
+num_of_whitespacesP:     .word   num_of_whitespaces
 
 num_of_characters:
     .asciz      "\tnum of characters: %d\n"
@@ -307,6 +340,18 @@ num_of_new_lines:
 
 num_of_words:
     .asciz      "\tnum of words: %d\n"
+    .align 2
+
+num_of_replacements:
+    .asciz      "\tnum of replacements: %d\n"
+    .align 2
+
+num_of_letters:
+    .asciz      "\tnum of letters: %d\n"
+    .align 2
+
+num_of_whitespaces:
+    .asciz      "\tnum of whitespaces: %d\n"
     .align 2
 
 summary_header:
